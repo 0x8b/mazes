@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sidewinder Algorithm</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <canvas></canvas>
+
+  <script>
+    const canvas = document.querySelector('canvas')
+
+    const rows = 64
+    const outline = 50
+    const cellSize = 600 / rows
+
+    canvas.width = canvas.height = 600 + 2 * outline
+
+    const ctx = canvas.getContext('2d')
+
+    ctx.fillStyle = 'khaki'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    const cells = []
+
+    for (let y = 0; y < rows; y++) {
+      let group = new Set()
+
+      for (let x = 0; x < rows; x++) {
+        let tail = Math.random() < 0.5
+
+        if (x == rows - 1) {
+          tail = false
+        }
+
+        group.add(x)
+
+        if (tail) {
+          cells.push({
+            x, y, top: true, right: false, bottom: true
+          })
+        } else {
+          cells.push({
+            x, y, top: true, right: true, bottom: true
+          })
+
+          const grouped = cells.filter(({ x: cx, y: cy }) => cy == y && group.has(cx))
+          const randomIndex = Math.floor(Math.random() * grouped.length)
+
+          grouped[randomIndex].top = false
+
+          group = new Set()
+        }
+      }
+    }
+
+    cells.sort(() => Math.random() < 0.5 ? 1 : -1)
+
+    const cell = cells.find(({ y }) => y == rows - 1)
+
+    if (cell) {
+      cell.bottom = false
+    }
+
+    ctx.lineWidth = 4
+    ctx.lineCap = 'round'
+    ctx.translate(outline, outline)
+
+    cells.forEach(({ x, y, top, right, bottom }) => {
+      if (top) {
+        ctx.beginPath()
+        ctx.moveTo(x * cellSize, y * cellSize)
+        ctx.lineTo((x + 1) * cellSize, y * cellSize)
+        ctx.stroke()
+      }
+
+      if (right) {
+        ctx.beginPath()
+        ctx.moveTo((x + 1) * cellSize, y * cellSize)
+        ctx.lineTo((x + 1) * cellSize, (y + 1) * cellSize)
+        ctx.stroke()
+      }
+
+      if (x == 0) {
+        ctx.beginPath()
+        ctx.moveTo(0, y * cellSize)
+        ctx.lineTo(0, (y + 1) * cellSize)
+        ctx.stroke()
+      }
+
+      if (y == rows - 1 && bottom) {
+        ctx.beginPath()
+        ctx.moveTo(x * cellSize, rows * cellSize)
+        ctx.lineTo((x + 1) * cellSize, rows * cellSize)
+        ctx.stroke()
+      }
+    })
+  </script>
+</body>
+</html>

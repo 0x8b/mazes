@@ -1,2 +1,3 @@
-# mazes
-Eksperymenty z generowaniem labiryntów.
+# Mazes
+
+Maze generation experiments.
